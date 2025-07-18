@@ -1,0 +1,61 @@
+---
+format_version: '11'
+default_step_lib_source: https://github.com/bitrise-io/bitrise-steplib.git
+project_type: android
+trigger_map:
+- push_branch: main
+  workflow: primary
+- pull_request_source_branch: "*"
+  workflow: primary
+workflows:
+  primary:
+    description: |
+      Builds the Android APK and makes it available for download.
+    steps:
+    - activate-ssh-key@4:
+        run_if: '{{getenv "SSH_RSA_PRIVATE_KEY" | ne ""}}'
+    - git-clone@8: {}
+    - cache-pull@2: {}
+    - script@1:
+        title: Set up environment
+        inputs:
+        - content: |
+            #!/bin/bash
+            set -ex
+            
+            # Print environment info
+            echo "Java version:"
+            java -version
+            
+            echo "Android SDK location:"
+            echo $ANDROID_HOME
+            
+            # Make gradlew executable
+            chmod +x ./gradlew
+    - gradle-runner@2:
+        inputs:
+        - gradle_task: assembleDebug
+        - gradle_options: --stacktrace
+        - gradlew_path: ./gradlew
+    - deploy-to-bitrise-io@2:
+        inputs:
+        - deploy_path: app/build/outputs/apk/debug/app-debug.apk
+        - is_compress: 'true'
+        - is_enable_public_page: 'true'
+    - cache-push@2:
+        inputs:
+        - cache_paths: |
+            ~/.gradle
+            .gradle
+            ~/.android/build-cache
+app:
+  envs:
+  - opts:
+      is_expand: false
+    GRADLE_OPTS: -Dorg.gradle.jvmargs="-Xmx3072m -XX:+HeapDumpOnOutOfMemoryError"
+  - opts:
+      is_expand: false
+    ANDROID_COMPILE_SDK: '34'
+  - opts:
+      is_expand: false
+    ANDROID_BUILD_TOOLS: 34.0.0

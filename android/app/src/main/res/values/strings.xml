@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">SMS PDU Analyzer</string>
+    <string name="permission_required">SMS permission is required to automatically analyze incoming messages</string>
+    <string name="permission_denied">Permission denied. You can still manually analyze PDUs.</string>
+    <string name="no_pdu_data">No PDU data available</string>
+    <string name="analyze_pdu">Analyze PDU</string>
+    <string name="manual_pdu_input">Manual PDU Input</string>
+    <string name="enter_pdu_hex">Enter PDU hexadecimal string</string>
+    <string name="analyze">Analyze</string>
+    <string name="clear">Clear</string>
+    <string name="paste">Paste</string>
+    <string name="invalid_pdu">Invalid PDU format</string>
+    <string name="analysis_complete">PDU analysis complete</string>
+    <string name="error_analyzing">Error analyzing PDU</string>
+    <string name="new_sms_analyzed">New SMS PDU analyzed</string>
+    <string name="settings">Settings</string>
+    <string name="about">About</string>
+    <string name="clear_all">Clear All</string>
+    <string name="confirm_clear_all">Are you sure you want to clear all PDU analyses?</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+</resources>
