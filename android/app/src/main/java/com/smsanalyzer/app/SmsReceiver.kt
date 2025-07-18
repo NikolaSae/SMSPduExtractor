@@ -21,15 +21,15 @@ class SmsReceiver : BroadcastReceiver() {
                 if (bundle != null) {
                     val pdus = bundle.get("pdus") as Array<*>
                     val format = bundle.getString("format")
-                    
+
                     for (pdu in pdus) {
                         val pduByteArray = pdu as ByteArray
                         val smsMessage = SmsMessage.createFromPdu(pduByteArray, format)
-                        
+
                         if (smsMessage != null) {
                             val pduHex = bytesToHex(pduByteArray)
                             Log.d(TAG, "Received SMS PDU: $pduHex")
-                            
+
                             // Start service to extract and analyze PDU
                             val serviceIntent = Intent(context, PduExtractionService::class.java).apply {
                                 putExtra("pdu_hex", pduHex)
@@ -44,6 +44,30 @@ class SmsReceiver : BroadcastReceiver() {
             } catch (e: Exception) {
                 Log.e(TAG, "Error processing SMS", e)
             }
+        }
+    }
+
+    private fun processWapPushIntent(context: Context, intent: Intent) {
+        try {
+            Log.d(TAG, "Processing WAP Push message")
+            val data = intent.getByteArrayExtra("data")
+            val mimeType = intent.type
+
+            if (data != null) {
+                val pduHex = bytesToHex(data)
+                Log.d(TAG, "WAP Push PDU: $pduHex")
+
+                val serviceIntent = Intent(context, PduExtractionService::class.java).apply {
+                    putExtra("pdu_hex", pduHex)
+                    putExtra("sender", "WAP Push")
+                    putExtra("message", "WAP Push Message (MIME: $mimeType)")
+                    putExtra("timestamp", System.currentTimeMillis())
+                    putExtra("message_type", "WAP_PUSH")
+                }
+                context.startService(serviceIntent)
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error processing WAP Push", e)
         }
     }
 
