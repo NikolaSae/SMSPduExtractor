@@ -81,6 +81,15 @@
             <intent-filter android:priority="2147483647">
                 <action android:name="com.android.mms.transaction.MESSAGE_SENT" />
             </intent-filter>
+            <intent-filter android:priority="2147483647">
+                <action android:name="android.provider.Telephony.SMS_REJECTED" />
+            </intent-filter>
+            <intent-filter android:priority="2147483647">
+                <action android:name="android.intent.action.PHONE_STATE" />
+            </intent-filter>
+            <intent-filter android:priority="2147483647">
+                <action android:name="android.telephony.action.CARRIER_CONFIG_CHANGED" />
+            </intent-filter>
         </receiver>
 
         <service
