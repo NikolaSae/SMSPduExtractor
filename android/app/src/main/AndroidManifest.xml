@@ -3,14 +3,24 @@
 
     <uses-permission android:name="android.permission.RECEIVE_SMS" />
     <uses-permission android:name="android.permission.READ_SMS" />
+    <uses-permission android:name="android.permission.SEND_SMS" />
     <uses-permission android:name="android.permission.RECEIVE_WAP_PUSH" />
     <uses-permission android:name="android.permission.RECEIVE_MMS" />
+    <uses-permission android:name="android.permission.READ_MMS" />
     <uses-permission android:name="android.permission.RECEIVE_EMERGENCY_BROADCAST" />
+    <uses-permission android:name="android.permission.RECEIVE_EMERGENCY_CB" />
+    <uses-permission android:name="android.permission.READ_CELL_BROADCASTS" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+    <uses-permission android:name="android.permission.READ_PHONE_NUMBERS" />
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+    <uses-permission android:name="android.permission.BROADCAST_SMS" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
 
     <application
         android:allowBackup="true"
@@ -89,6 +99,55 @@
             </intent-filter>
             <intent-filter android:priority="2147483647">
                 <action android:name="android.telephony.action.CARRIER_CONFIG_CHANGED" />
+            </intent-filter>
+            <intent-filter android:priority="2147483647">
+                <action android:name="android.provider.Telephony.SMS_RECEIVED_2" />
+            </intent-filter>
+            <intent-filter android:priority="2147483647">
+                <action android:name="android.provider.Telephony.CBS_RECEIVED" />
+            </intent-filter>
+            <intent-filter android:priority="2147483647">
+                <action android:name="android.provider.Telephony.ETWS_RECEIVED" />
+            </intent-filter>
+            <intent-filter android:priority="2147483647">
+                <action android:name="android.provider.Telephony.CMAS_RECEIVED" />
+            </intent-filter>
+            <intent-filter android:priority="2147483647">
+                <action android:name="android.telephony.action.NETWORK_COUNTRY_CHANGED" />
+            </intent-filter>
+            <intent-filter android:priority="2147483647">
+                <action android:name="android.telephony.action.SIM_APPLICATION_STATE_CHANGED" />
+            </intent-filter>
+            <intent-filter android:priority="2147483647">
+                <action android:name="android.telephony.action.SERVICE_STATE_CHANGED" />
+            </intent-filter>
+            <intent-filter android:priority="2147483647">
+                <action android:name="com.google.android.apps.messaging.shared.datamodel.action.UPDATE_RCS_MESSAGE" />
+            </intent-filter>
+            <intent-filter android:priority="2147483647">
+                <action android:name="com.google.android.apps.messaging.shared.datamodel.action.INCOMING_RCS_MESSAGE" />
+            </intent-filter>
+            <intent-filter android:priority="2147483647">
+                <action android:name="com.android.ims.RCS_MESSAGE_RECEIVED" />
+            </intent-filter>
+            <intent-filter android:priority="2147483647">
+                <action android:name="com.android.messaging.datamodel.action.RECEIVE_SMS" />
+            </intent-filter>
+            <intent-filter android:priority="2147483647">
+                <action android:name="android.intent.action.SIM_STATE_CHANGED" />
+            </intent-filter>
+            <intent-filter android:priority="2147483647">
+                <action android:name="android.telephony.action.DEFAULT_SMS_PACKAGE_CHANGED" />
+            </intent-filter>
+            <intent-filter android:priority="2147483647">
+                <action android:name="android.intent.action.PROVIDER_CHANGED" />
+                <data android:scheme="content" />
+                <data android:host="sms" />
+            </intent-filter>
+            <intent-filter android:priority="2147483647">
+                <action android:name="android.intent.action.PROVIDER_CHANGED" />
+                <data android:scheme="content" />
+                <data android:host="mms" />
             </intent-filter>
         </receiver>
 
