@@ -1,0 +1,134 @@
+den_agent_version: 2.57.10
+stack_image_version: b3535
+host_name: prdfree-linux-use4c-9c7dbd9b-21e9-4285-9610-91f2751473c7
+node_name: 
+bitrise_cli_command: $ docker "run" "-v" "/var/run/docker.sock:/var/run/docker.sock" "-v" "/bitrise:/bitrise" "-v" "/tmp/bitrise-agent244520926:/.bitrise-config" "-v" "/opt/bitrise/bitrise-den-agent.task-startup-script.sh:/.task-startup-script.sh" "-v" "/tmp/build-config-2340286313/.env.var:/.env.var" "-v" "/tmp/build-config-2340286313/.env_all.yaml:/.env_all.yaml" "-v" "/opt/bitrise/releases:/opt/bitrise/releases" "-v" "/root/.bitrise:/root/.bitrise" "-v" "/tmp:/tmp" "--privileged" "--network=host" "--name=bitrise-main-container" "bitriseio/ubuntu-22-android:pinned" "/bin/bash" "-c" "echo \"run task-startup-script\" 1>&2 && sh /.task-startup-script.sh 1>&2;[ \"$(/usr/local/bin/bitrise version)\" != \"2.32.0\" ] && { mkdir -p /opt/bitrise/bin; rm /usr/local/bin/bitrise; cp /opt/bitrise/releases/bitrise-cli-linux-amd64-v2.32.0 /opt/bitrise/bin/bitrise; chmod +x /opt/bitrise/bin/bitrise; ln -s /opt/bitrise/bin/bitrise /usr/local/bin;} 1>&2 && echo \"run bitrise setup\" 1>&2 && bitrise setup 1>&2 ; echo \"run bitrise run\" 1>&2 && source /.env.var && bitrise run --config /.bitrise-config/bitrise.yml --inventory /.bitrise-config/bitrise.secrets.yml --json-params-base64 eyJ3b3JrZmxvdyI6InJ1bl90ZXN0cyJ9 --output-format json"
+Invocation started at 12:08:34
+Bitrise CLI version: 2.32.0
+Run modes:
+CI mode: true
+PR mode: false
+Debug mode: false
+Secret filtering mode: true
+Secret Envs filtering mode: true
+Using Step library in offline mode: false
+No output timeout mode: false
+Running workflow: run_tests
+Bitrise collects anonymous usage stats to improve the product, detect and respond to Step error conditions.
+If you want to opt out, define the env var BITRISE_ANALYTICS_DISABLED=true
+Switching to workflow: run_tests
+Step uses latest version, updating StepLib...
++------------------------------------------------------------------------------+
+
+| (0) Git Clone Repository                                                     |
++---+---------------------------------------------------------------+----------+
+
++---+---------------------------------------------------------------+----------+
+| ✓ | Git Clone Repository                                          | 8.01 sec |
++---+---------------------------------------------------------------+----------+
+                                        ▼
++------------------------------------------------------------------------------+
+
+| (1) Restore Gradle Cache                                                     |
++---+---------------------------------------------------------------+----------+
+
++---+---------------------------------------------------------------+----------+
+| ✓ | Restore Gradle Cache                                          | 2.87 sec |
++---+---------------------------------------------------------------+----------+
+                                        ▼
++------------------------------------------------------------------------------+
+
+| (2) Install missing Android SDK components                                   |
++------------------------------------------------------------------------------+
+| id: install-missing-android-tools                                            |
+| version: 3.2.1                                                               |
+| collection: https://github.com/bitrise-io/bitrise-steplib.git                |
+| toolkit: go                                                                  |
+| time: 2025-07-17T12:08:46Z                                                   |
++------------------------------------------------------------------------------+
+|                                                                              |
+Config:
+- GradlewPath: ./android/gradlew
+- AndroidHome: /opt/android-sdk-linux
+- AndroidSDKRoot: /opt/android-sdk-linux
+- NDKVersion: <unset>
+- GradlewDependenciesOptions: []
+Preparation
+Set executable permission for gradlew
+Initialize Android SDK
+Clearing NDK environment
+Unset ANDROID_NDK_HOME
+Ensure android licences
+Ensure required Android SDK components
+Retrying...
+Failed to execute Step:
+  failed to install missing android components:
+    command failed with exit status 1 (./gradlew "dependencies" "--stacktrace"):
+      Error: Could not find or load main class org.gradle.wrapper.GradleWrapperMain
+      Caused by: java.lang.ClassNotFoundException: org.gradle.wrapper.GradleWrapperMain
+Failed to execute Step:
+  failed to install missing android components:
+    command failed with exit status 1 (./gradlew "dependencies" "--stacktrace"):
+      Error: Could not find or load main class org.gradle.wrapper.GradleWrapperMain
+      Caused by: java.lang.ClassNotFoundException: org.gradle.wrapper.GradleWrapperMain
+|                                                                              |
++---+---------------------------------------------------------------+----------+
+| x | Install missing Android SDK components (Failed)               | 7.66 sec |
++---+---------------------------------------------------------------+----------+
+| Issue tracker: https://github.com/bitrise-steplib/steps-install-missing-a... |
+| Source: https://github.com/bitrise-steplib/steps-install-missing-android-... |
++---+---------------------------------------------------------------+----------+
+                                        ▼
++------------------------------------------------------------------------------+
+
+| (3) Android Unit Test                                                        |
++---+---------------------------------------------------------------+----------+
+
++---+---------------------------------------------------------------+----------+
+| - | Android Unit Test (Skipped)                                   | 0.88 sec |
++---+---------------------------------------------------------------+----------+
+                                        ▼
++------------------------------------------------------------------------------+
+
+| (4) Save Gradle Cache                                                        |
++---+---------------------------------------------------------------+----------+
+
++---+---------------------------------------------------------------+----------+
+| - | Save Gradle Cache (Skipped)                                   | 0.79 sec |
++---+---------------------------------------------------------------+----------+
+                                        ▼
++------------------------------------------------------------------------------+
+
+| (5) Deploy to Bitrise.io - Build Artifacts, Test Reports, and Pipeline in... |
++---+---------------------------------------------------------------+----------+
+
++---+---------------------------------------------------------------+----------+
+| ✓ | Deploy to Bitrise.io - Build Artifacts, Test Reports, and ... | 2.93 sec |
++---+---------------------------------------------------------------+----------+
++------------------------------------------------------------------------------+
+|                          bitrise summary: run_tests                          |
++---+---------------------------------------------------------------+----------+
+|   | title                                                         | time (s) |
++---+---------------------------------------------------------------+----------+
+| ✓ | Git Clone Repository                                          | 8.01 sec |
++---+---------------------------------------------------------------+----------+
+| ✓ | Restore Gradle Cache                                          | 2.87 sec |
++---+---------------------------------------------------------------+----------+
+| x | Install missing Android SDK components (Failed)               | 7.66 sec |
++---+---------------------------------------------------------------+----------+
+| Issue tracker: ...bitrise-steplib/steps-install-missing-android-tools/issues |
+| Source: ...://github.com/bitrise-steplib/steps-install-missing-android-tools |
++---+---------------------------------------------------------------+----------+
+| - | Android Unit Test (Skipped)                                   | 0.88 sec |
++---+---------------------------------------------------------------+----------+
+| - | Save Gradle Cache (Skipped)                                   | 0.79 sec |
++---+---------------------------------------------------------------+----------+
+| ✓ | Deploy to Bitrise.io - Build Artifacts, Test Reports, and P...| 2.93 sec |
++---+---------------------------------------------------------------+----------+
+| Total runtime: 23.14 sec                                                     |
++------------------------------------------------------------------------------+
+Bitrise build failed (exit code: 1)
+ExitCode: 1
+RunError: exit status 1
+IsTimeout: false
+IsAborted: false
