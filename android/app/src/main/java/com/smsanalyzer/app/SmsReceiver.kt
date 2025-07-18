@@ -36,8 +36,25 @@ class SmsReceiver : BroadcastReceiver() {
             Telephony.Sms.Intents.WAP_PUSH_RECEIVED_ACTION -> {
                 processWapPushIntent(context, intent)
             }
+            Telephony.Mms.Intents.MMS_RECEIVED_ACTION -> {
+                processMmsReceived(context, intent)
+            }
+            "android.intent.action.DATA_SMS_RECEIVED" -> {
+                processDataSmsReceived(context, intent)
+            }
+            "com.google.android.apps.messaging.shared.datamodel.action.RECEIVE_RCS_MESSAGE" -> {
+                processRcsMessage(context, intent)
+            }
+            "com.android.mms.transaction.MESSAGE_SENT" -> {
+                processMessageSent(context, intent)
+            }
+            "android.telephony.action.SUBSCRIPTION_CARRIER_IDENTITY_CHANGED" -> {
+                processCarrierIdentityChanged(context, intent)
+            }
             else -> {
                 Log.d(TAG, "Unknown intent action: ${intent.action}")
+                // Try to process any unknown intent as potential SMS data
+                processGenericMessage(context, intent)
             }
         }
     }
@@ -205,13 +222,186 @@ class SmsReceiver : BroadcastReceiver() {
         }
     }
 
+    private fun processMmsReceived(context: Context, intent: Intent) {
+        try {
+            Log.d(TAG, "Processing MMS message")
+            val bundle = intent.extras
+            if (bundle != null) {
+                val data = bundle.getByteArray("data")
+                val contentLocation = bundle.getString("content_location")
+                val transactionId = bundle.getString("transaction_id")
+                
+                if (data != null) {
+                    val pduHex = bytesToHex(data)
+                    Log.d(TAG, "MMS PDU: $pduHex")
+
+                    val serviceIntent = Intent(context, PduExtractionService::class.java).apply {
+                        putExtra("pdu_hex", pduHex)
+                        putExtra("sender", "MMS")
+                        putExtra("message", "MMS Message (Location: $contentLocation)")
+                        putExtra("timestamp", System.currentTimeMillis())
+                        putExtra("message_type", "MMS")
+                    }
+                    context.startService(serviceIntent)
+                }
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error processing MMS", e)
+        }
+    }
+
+    private fun processDataSmsReceived(context: Context, intent: Intent) {
+        try {
+            Log.d(TAG, "Processing Data SMS")
+            val bundle = intent.extras
+            if (bundle != null) {
+                val data = bundle.getByteArray("data")
+                val originatingAddress = bundle.getString("originating_address")
+                val destinationPort = bundle.getInt("destination_port", -1)
+                
+                if (data != null) {
+                    val pduHex = bytesToHex(data)
+                    Log.d(TAG, "Data SMS PDU: $pduHex")
+
+                    val serviceIntent = Intent(context, PduExtractionService::class.java).apply {
+                        putExtra("pdu_hex", pduHex)
+                        putExtra("sender", originatingAddress ?: "Data SMS")
+                        putExtra("message", "Data SMS (Port: $destinationPort)")
+                        putExtra("timestamp", System.currentTimeMillis())
+                        putExtra("message_type", "DATA_SMS")
+                    }
+                    context.startService(serviceIntent)
+                }
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error processing Data SMS", e)
+        }
+    }
+
+    private fun processRcsMessage(context: Context, intent: Intent) {
+        try {
+            Log.d(TAG, "Processing RCS message")
+            val bundle = intent.extras
+            if (bundle != null) {
+                val messageData = bundle.getByteArray("message_data")
+                val conversationId = bundle.getString("conversation_id")
+                val messageId = bundle.getString("message_id")
+                
+                if (messageData != null) {
+                    val pduHex = bytesToHex(messageData)
+                    Log.d(TAG, "RCS message PDU: $pduHex")
+
+                    val serviceIntent = Intent(context, PduExtractionService::class.java).apply {
+                        putExtra("pdu_hex", pduHex)
+                        putExtra("sender", "RCS")
+                        putExtra("message", "RCS Message (ID: $messageId)")
+                        putExtra("timestamp", System.currentTimeMillis())
+                        putExtra("message_type", "RCS")
+                    }
+                    context.startService(serviceIntent)
+                }
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error processing RCS message", e)
+        }
+    }
+
+    private fun processMessageSent(context: Context, intent: Intent) {
+        try {
+            Log.d(TAG, "Processing message sent notification")
+            val bundle = intent.extras
+            if (bundle != null) {
+                val messageUri = bundle.getString("message_uri")
+                val messageId = bundle.getString("message_id")
+                
+                Log.d(TAG, "Message sent: URI=$messageUri, ID=$messageId")
+                
+                // Try to extract any PDU data from the intent
+                val pduData = bundle.getByteArray("pdu") ?: bundle.getByteArray("data")
+                if (pduData != null) {
+                    val pduHex = bytesToHex(pduData)
+                    
+                    val serviceIntent = Intent(context, PduExtractionService::class.java).apply {
+                        putExtra("pdu_hex", pduHex)
+                        putExtra("sender", "Sent Message")
+                        putExtra("message", "Outgoing Message PDU")
+                        putExtra("timestamp", System.currentTimeMillis())
+                        putExtra("message_type", "SENT")
+                    }
+                    context.startService(serviceIntent)
+                }
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error processing message sent", e)
+        }
+    }
+
+    private fun processCarrierIdentityChanged(context: Context, intent: Intent) {
+        try {
+            Log.d(TAG, "Processing carrier identity change")
+            val bundle = intent.extras
+            if (bundle != null) {
+                val carrierId = bundle.getInt("carrier_id", -1)
+                val subscriptionId = bundle.getInt("subscription_id", -1)
+                
+                Log.d(TAG, "Carrier identity changed: CarrierID=$carrierId, SubscriptionID=$subscriptionId")
+                
+                // This might contain configuration data
+                val configData = bundle.getByteArray("config_data")
+                if (configData != null) {
+                    val pduHex = bytesToHex(configData)
+                    
+                    val serviceIntent = Intent(context, PduExtractionService::class.java).apply {
+                        putExtra("pdu_hex", pduHex)
+                        putExtra("sender", "Carrier Config")
+                        putExtra("message", "Carrier Identity Changed")
+                        putExtra("timestamp", System.currentTimeMillis())
+                        putExtra("message_type", "CARRIER_CONFIG")
+                    }
+                    context.startService(serviceIntent)
+                }
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error processing carrier identity change", e)
+        }
+    }
+
+    private fun processGenericMessage(context: Context, intent: Intent) {
+        try {
+            Log.d(TAG, "Processing generic message: ${intent.action}")
+            val bundle = intent.extras
+            if (bundle != null) {
+                // Try to find any byte array data in the bundle
+                for (key in bundle.keySet()) {
+                    val value = bundle.get(key)
+                    if (value is ByteArray && value.isNotEmpty()) {
+                        val pduHex = bytesToHex(value)
+                        Log.d(TAG, "Found data in key '$key': $pduHex")
+                        
+                        val serviceIntent = Intent(context, PduExtractionService::class.java).apply {
+                            putExtra("pdu_hex", pduHex)
+                            putExtra("sender", "Generic Message")
+                            putExtra("message", "Generic Message Data (Key: $key)")
+                            putExtra("timestamp", System.currentTimeMillis())
+                            putExtra("message_type", "GENERIC")
+                        }
+                        context.startService(serviceIntent)
+                        break // Only process the first byte array found
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error processing generic message", e)
+        }
+    }
+
     private fun bytesToHex(bytes: ByteArray): String {
         val hexChars = CharArray(bytes.size * 2)
         for (i in bytes.indices) {
             val v = bytes[i].toInt() and 0xFF
             hexChars[i * 2] = "0123456789ABCDEF"[v ushr 4]
             hexChars[i * 2 + 1] = "0123456789ABCDEF"[v and 0x0F]
-        }
+            }
         return String(hexChars)
     }
 }
