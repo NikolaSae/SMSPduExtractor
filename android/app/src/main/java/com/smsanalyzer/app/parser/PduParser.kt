@@ -220,6 +220,8 @@ class PduParser {
     }
 
     private fun decode7BitMessage(userData: String, udl: Int): String {
+        Log.d("PduParser", "Decoding GSM 7-bit: userData=$userData, udl=$udl")
+        
         // Convert hex string to bytes
         val bytes = mutableListOf<Int>()
         var i = 0
@@ -228,51 +230,47 @@ class PduParser {
             i += 2
         }
 
+        Log.d("PduParser", "Bytes: $bytes")
+
         val result = StringBuilder()
-        var carry = 0
-        var carryBits = 0
+        var bitsCarried = 0
+        var carryOver = 0
 
         for (byteIndex in bytes.indices) {
             if (result.length >= udl) break
 
             val currentByte = bytes[byteIndex]
-            val shift = byteIndex % 7
-
-            when (shift) {
-                0 -> {
-                    // First byte, extract 7 bits
-                    val char = currentByte and 0x7F
-                    if (char != 0) result.append(getGsm7BitChar(char))
-                    carry = currentByte shr 7
-                    carryBits = 1
-                }
-                else -> {
-                    // Extract character from current byte + carry
-                    val char = ((currentByte shl (7 - shift)) or carry) and 0x7F
-                    if (char != 0 && result.length < udl) {
-                        result.append(getGsm7BitChar(char))
-                    }
-
-                    // Update carry for next iteration
-                    carry = currentByte shr (8 - shift)
-                    carryBits = shift
-
-                    // If we have 7 carry bits, that's a complete character
-                    if (carryBits == 7 && result.length < udl) {
-                        if (carry != 0) result.append(getGsm7BitChar(carry))
-                        carry = 0
-                        carryBits = 0
-                    }
+            
+            // Calculate how many bits to shift based on position
+            val bitsToShift = byteIndex % 7
+            
+            if (bitsToShift == 0) {
+                // First byte of a 7-byte group
+                val char = currentByte and 0x7F
+                result.append(getGsm7BitChar(char))
+                carryOver = currentByte shr 7
+                bitsCarried = 1
+            } else {
+                // Extract character using current byte and carry over
+                val char = ((currentByte shl (7 - bitsToShift)) or carryOver) and 0x7F
+                result.append(getGsm7BitChar(char))
+                
+                // Update carry over for next iteration
+                carryOver = currentByte shr (8 - bitsToShift)
+                bitsCarried = bitsToShift
+                
+                // Check if we have enough bits for another character
+                if (bitsCarried == 7 && result.length < udl) {
+                    result.append(getGsm7BitChar(carryOver and 0x7F))
+                    carryOver = 0
+                    bitsCarried = 0
                 }
             }
         }
 
-        // Add any remaining carry bits as final character
-        if (carryBits > 0 && carry != 0 && result.length < udl) {
-            result.append(getGsm7BitChar(carry))
-        }
-
-        return result.toString().take(udl)
+        val finalResult = result.toString().take(udl)
+        Log.d("PduParser", "Final decoded result: '$finalResult'")
+        return finalResult
     }
 
     private fun decodeUCS2Message(userData: String): String {
