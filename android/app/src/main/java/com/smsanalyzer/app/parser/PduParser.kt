@@ -205,17 +205,22 @@ class PduParser {
 
     private fun decodeMessage(userData: String, encoding: String, udl: Int): String? {
         return try {
-            when (encoding) {
+            Log.d("PduParser", "Decoding message: encoding=$encoding, udl=$udl, userData=$userData")
+            val result = when (encoding) {
                 "GSM 7-bit" -> decode7BitMessage(userData, udl)
                 "UCS2" -> decodeUCS2Message(userData)
                 else -> decodeHexMessage(userData)
             }
+            Log.d("PduParser", "Decoded result: $result")
+            result
         } catch (e: Exception) {
+            Log.e("PduParser", "Error decoding message", e)
             "Unable to decode message"
         }
     }
 
     private fun decode7BitMessage(userData: String, udl: Int): String {
+        // Convert hex string to byte array
         val bytes = mutableListOf<Int>()
         var i = 0
         while (i < userData.length) {
@@ -223,35 +228,42 @@ class PduParser {
             i += 2
         }
         
-        var result = ""
-        var carry = 0
-        var carryBits = 0
+        if (bytes.isEmpty()) return ""
         
-        for (i in bytes.indices) {
+        val result = StringBuilder()
+        var leftoverBits = 0
+        var leftoverBitsCount = 0
+        
+        for (byteIndex in bytes.indices) {
             if (result.length >= udl) break
             
-            val byte = bytes[i]
-            val shift = i % 7
+            val currentByte = bytes[byteIndex]
+            val shift = byteIndex % 7
             
             if (shift == 0) {
-                result += (byte and 0x7F).toChar()
-                carry = byte shr 7
-                carryBits = 1
+                // First byte or every 7th byte
+                result.append((currentByte and 0x7F).toChar())
+                leftoverBits = currentByte shr 7
+                leftoverBitsCount = 1
             } else {
-                val char = ((byte shl (7 - shift)) or carry) and 0x7F
-                result += char.toChar()
-                carry = byte shr (8 - shift)
-                carryBits = shift
+                // Extract character from current byte combined with leftover bits
+                val extractedChar = ((currentByte shl (7 - shift)) or leftoverBits) and 0x7F
+                result.append(extractedChar.toChar())
                 
-                if (carryBits == 7) {
-                    result += carry.toChar()
-                    carry = 0
-                    carryBits = 0
+                // Update leftover bits
+                leftoverBits = currentByte shr (8 - shift)
+                leftoverBitsCount = shift
+                
+                // If we have 7 leftover bits, that's a complete character
+                if (leftoverBitsCount == 7 && result.length < udl) {
+                    result.append(leftoverBits.toChar())
+                    leftoverBits = 0
+                    leftoverBitsCount = 0
                 }
             }
         }
         
-        return result.take(udl)
+        return result.toString().take(udl)
     }
 
     private fun decodeUCS2Message(userData: String): String {
