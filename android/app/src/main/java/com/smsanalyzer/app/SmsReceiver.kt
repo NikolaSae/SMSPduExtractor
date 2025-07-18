@@ -24,7 +24,7 @@ class SmsReceiver : BroadcastReceiver() {
             Telephony.Sms.Intents.SMS_DELIVER_ACTION -> {
                 processSmsDeliver(context, intent)
             }
-            Telephony.Sms.Intents.SMS_CB_RECEIVED_ACTION -> {
+            "android.provider.Telephony.SMS_CB_RECEIVED" -> {
                 processCellBroadcast(context, intent)
             }
             "android.provider.Telephony.SMS_EMERGENCY_CB_RECEIVED" -> {
@@ -33,10 +33,10 @@ class SmsReceiver : BroadcastReceiver() {
             "android.provider.Telephony.SMS_SERVICE_CATEGORY_PROGRAM_DATA_RECEIVED" -> {
                 processServiceCategoryProgramData(context, intent)
             }
-            Telephony.Sms.Intents.WAP_PUSH_RECEIVED_ACTION -> {
+            "android.provider.Telephony.WAP_PUSH_RECEIVED" -> {
                 processWapPushIntent(context, intent)
             }
-            Telephony.Mms.Intents.MMS_RECEIVED_ACTION -> {
+            "android.provider.Telephony.MMS_RECEIVED" -> {
                 processMmsReceived(context, intent)
             }
             "android.intent.action.DATA_SMS_RECEIVED" -> {
