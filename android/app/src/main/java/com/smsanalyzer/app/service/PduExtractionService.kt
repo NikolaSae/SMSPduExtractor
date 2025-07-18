@@ -34,6 +34,10 @@ class PduExtractionService : Service() {
         val sender = intent.getStringExtra("sender")
         val message = intent.getStringExtra("message")
         val timestamp = intent.getLongExtra("timestamp", System.currentTimeMillis())
+        val messageType = intent.getStringExtra("message_type") ?: "SMS"
+        
+        Log.d(TAG, "Processing $messageType - PDU: $pduHex")
+        Log.d(TAG, "Sender: $sender, Message: $message")
 
         if (pduHex != null) {
             Log.d(TAG, "Processing PDU: $pduHex")
